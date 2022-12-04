@@ -69,23 +69,61 @@ def select_sorted(sort_columns=["high"], limit=30, group_by_name=False, order='d
 
 
 
-def binary_search_iterativ(lst_sorted, element, name):
+def binary_search_iterativ(lst, element, name):
   mid = 0
   start = 0
-  end = len(lst_sorted)
+  end = len(lst)
   step = 0
-  
-  while (start <= end):
+  tmp = []
+  if element == None:
+    while (start <= end):
+      step = step+1
+      mid = (start + end) // 2
+      if name == lst[mid]['Name']:
+          while name == lst[mid]['Name']:
+            tmp.append(lst[mid])
+            mid +=1    
+          return tmp
+      if name < lst[mid]['Name']:
+        end = mid - 1
+      else:
+        start = mid + 1
+    return -1
+  elif name == None:
+      lst_sorted = sorted(lst, key=lambda x: x['date'])
+      while (start <= end):
+          step = step +1
+          mid = (start + end) // 2
+          if element == lst_sorted[mid]['date']:
+              while element == lst_sorted[mid]['date']:
+                  tmp.append(lst_sorted[mid])
+                  mid += 1
+              return tmp
+          if element < lst_sorted[mid]['date']:
+              end = mid - 1
+          else:
+              start = mid + 1
+      return -1
+  else:
+    while (start <= end):
     
-    step = step+1
-    mid = (start + end) // 2
-    if element == lst_sorted[mid]['date'] and name == lst_sorted[mid]['Name']:
-      return lst_sorted[mid]
-    if element < lst_sorted[mid]['date']:
-      end = mid - 1
-    else:
-      start = mid + 1
-  return -1
+      step = step+1
+      mid = (start + end) // 2
+      if name == lst[mid]['Name']:
+        while name == lst[mid]['Name']:
+          if element > lst[mid]['date']:
+            mid += 1
+          elif element < lst[mid]['date']:
+            mid = mid -1
+          else:
+            return lst[mid]
+      if name < lst[mid]['Name']:
+        end = mid - 1
+      else:
+        start = mid + 1
+    return -1
+
+
 
 @lru_cache
 def get_by_date(date=None, name=None, filename='dump.csv'):
@@ -96,16 +134,16 @@ def get_by_date(date=None, name=None, filename='dump.csv'):
      for row in reader:
          lst.append(row)
 
-     lst_sorted = sorted(lst, key=lambda x: x['date'])     
+     #lst_sorted = sorted(lst, key=lambda x: x['date'])     
 
-     print(binary_search_iterativ(lst_sorted, date, name))
-     #if filename:
-          #with open(filename, 'w', newline='') as csvfile:
-            #fieldnames = ['date', 'open', 'high', 'low', 'close', 'volume', 'Name']  
-            #write = csv.DictWriter(csvfile, fieldnames = fieldnames)
-            #write.writeheader()
-            
-            #write.writerow(binary_search_iterativ(lst, date, name))
+     binary_search_iterativ(lst, date, name)
+     if filename:
+          with open(filename, 'w', newline='') as csvfile:
+            fieldnames = ['date', 'open', 'high', 'low', 'close', 'volume', 'Name']  
+            write = csv.DictWriter(csvfile, fieldnames = fieldnames)
+            write.writeheader()
+            for i in binary_search_iterativ(lst, date, name):
+              write.writerow(i)
 
     
 
@@ -116,5 +154,6 @@ def main():
 
 
 #select_sorted(sort_columns=["date"], order='desc', limit=None, filename='dump.csv' ) 
-get_by_date(date="2017-08-08", name="PCLN", filename='dump.csv')
+#get_by_date(date="2017-08-08", name="PCLN", filename='dump.csv')
 #get_by_date(name="PCLN", filename='dump.csv')
+get_by_date(date="2017-08-08", filename='dump.csv')
